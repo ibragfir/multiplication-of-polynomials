@@ -1,115 +1,178 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+int XMIN = 0;
+int ** arrs = 0;
 
-
-void error () {
-	printf("Nespravny vstup.\n");
+void onePart(){															/*JUST ONE PART!!!   */
+	printf("Cena: 0\n");
+}
+void error() {
+	printf("Nespravny vstup.\n");										/*ERROR				 */
 	exit(1);
 }
+int recursion ( int *arr,int ind, int actSize,int actMin) {
+	int newSize = actSize-1;
+	int * newArr;// [actSize];
+	int j, i;
+	int min  = 0;
 
-int main ( void ) {
-	int n1;
-	int n2;
-	int * polA;
-	int * polB;
-	int * polC;
-	int i=0, j=0;
-	int sizeA, sizeB, sizeC;
-
-	
-	
-
-	printf("Zadejte stupen polynomu A:\n");
-	if (scanf("%d", &n1) !=1 || (n1 < 0)){ 
-			error();
+	if (!arrs)
+	{
+		arrs = (int**) malloc (actSize * sizeof(int*));
+		for (i = 0; i < actSize; ++i)
+		{	
+			arrs[i] = (int*) malloc (actSize * sizeof(int));
+		}
 	}
-	sizeA  = n1 + 1;
-	polA=(int *) malloc ((sizeA) * sizeof(int));
-	printf("Zadejte koeficienty polynomu A:\n");
-			for (i=0; i<sizeA; i++){
-				if	(scanf("%d", &polA[i]) !=1 ){
-				 	error ();
-			}	}
-		
-	printf("Zadejte stupen polynomu B:\n");
-	if (scanf("%d", &n2) !=1 || (n2 < 0)) {
-				error();
+
+	if (ind == 0)
+	{
+		newArr = arr;
 	}
-	sizeB = n2 + 1;
-	polB=(int *) malloc ((sizeB) * sizeof(int));
-	printf("Zadejte koeficienty polynomu B:\n");
-			for (j=0; j<sizeB; j++){
-				if	(scanf("%d", &polB[j]) !=1){
-					error();
-				} 
+	else
+	{
+		newArr = arrs[actSize-1];
+	}
+	
+	if (ind != 0) {
+		//newArr = (int*) malloc (newSize * sizeof(int));
+		j=0;
+		for (i=0; i<actSize; i++) { /* copying elements of the old array to new SKIPPING one element!  */
+			if (i!=ind) {
+				newArr[j] = arr[i];
+				j++;
 			}
-	if ((n1==0) && (n2==0) && (polA[0] ==0) && (polB[0] ==0)){
-	printf("0\n");
+		}
+	}
+	else {
+		//newArr = arr; //(int*) malloc (actSize * sizeof(int));
+	//	for (i=0; i<actSize; i++) 
+	//		newArr[i] = arr[i];
+		newSize = actSize;
+	}	
+	for (i=1; i<newSize-1; i++){
+		min = newArr[i-1]*newArr[i+1];
+		if ( XMIN && ((min + actMin) >= XMIN))
+			break;
+		if (newSize == 3) {
+			if (XMIN) {
+				if ((actMin+min) < XMIN)
+					XMIN = min + actMin;
+				if(ind) ;
+					//free(newArr);
+				break;
+				
+			}
+			else {
+				XMIN = actMin + min;
+				if(ind) ;
+					//free(newArr);				
+				break;
+			}
+		}	
+		if (!recursion(newArr, i, newSize, actMin+min)) {
+			if (i==newSize-2){
+				if (ind) ;
+					//free(newArr);
+				break;	
+			}	
+		}
+	}	
+	//if (ind)	;
+		//free(newArr);
+	//free(arr);
+	if (!ind)
+	{
+		for (i = 0; i < actSize; ++i)
+		{	
+			free(arrs[i]);
+		}
+		free(arrs);
+	}	
 	return 0;
+}
+
+int main(void)
+{														/*MAIN   */
+int c=0;
+int *arr;
+int i=0;
+int actSize;
+int sizeArr = 100;
+int amount=0;
+
+	arr = (int*) malloc (sizeArr * sizeof(int));
+	printf("Zadejte pocty sroubu pro jednotlive priruby:\n");
+	while( c!='\n' && c != -1)  {
+		if ( scanf("%d", &arr[i]) == 1) {
+			if (arr[i]>=1)
+			{
+				if (++i == sizeArr) {
+					sizeArr *= 2;
+					if (!realloc (arr, sizeArr)) {
+		//				printf	("Error during the realloc");
+						free(arr);
+						exit(1);
+					}
+				}
+	   			c=getchar();
+	//			printf("c: %d\n", c);	
+				if (c != '\n' && c != ' ' && c != -1) {
+				    free(arr);
+					error();	
+				}
+			}
+			else
+			{
+				free(arr);
+				error();
+			}
+		}
+		else {
+			if (!feof(stdin))
+			{
+				free(arr);
+				error();
+			}
+			break;
+			/*printf("error: %d\n", feof(stdin));
+			c = getchar();
+			printf("c: %d\n", c);	
+			while (c == ' ')
+			{
+				c = getchar();
+				printf("c: %d\n", c);		
+			}
+			if (c != '\n' && c != -1)
+			{
+				free(arr);
+				error();
+			}*/
+		}
+//		printf("CCC: %d\n", c);
 	}
-	sizeC = n1+n2+1;
-	
-	// the array to store coeffecients of the result polynom polC
-    polC = (int*) malloc ( sizeC * sizeof(int) );
-	if (polC == NULL) // memory was not allocated for some reason - not programs fault.
-		exit (1);
-	
-	
-
-	for (i=0; i<sizeC; i++) polC[i] = 0; // to set all values of array to zero 
-
-	if (sizeA >= sizeB) {
-		for (i = 0; i < sizeA ; i++) {
-			for (j = 0; j < sizeB; j++)
-				polC[i+j] +=  polA[i]*polB[j];
-   		}
-	}else {
-		for (i = 0; i < sizeB ; i++) {
-			for (j = 0; j < sizeA; j++)
-				polC[i+j] +=  polB[i]*polA[j];
-   		}
-	 }
-//	printf("pole%d\n",polC[0]);
-	if (sizeC==1){
-	printf("%d\n",polC[0]);
-	return 0;
+	if(i<=1) {
+		free(arr);		
+		error();	
 	}
-	
-
-	/* PRINTING OUT THE FINAL RESULT */
-	for (i=0; i<sizeC-2; i++) {
-		if (polC[i]!=1 && polC[i]!=-1 && polC[i]!=0)
-			printf("%dx<sup>%d</sup>", polC[i],(sizeC-1-i));
-		else if (polC[i] == 1) 
-			printf("x<sup>%d</sup>",(sizeC-1-i));
-		else if (polC[i] == -1) 
-			printf("-x<sup>%d</sup>",(sizeC-1-i));
-		if ((polC[i+1] > 0) && polB[0]!=0 && polA[0]!=0)
-			printf("+");
-	
+	actSize = i;
+/*	printf("act=%d\n",actSize);*/
+	for(i=1;i<actSize-1;i++){      /*FINDING AN AMOUNT OF REMOVABLE ITEMS */
+		amount+=arr[i];
 	}
+/*printf("total=%d\n",amount);*/
 	
-	if (polC[sizeC-2] !=1 && polC[sizeC-2] !=-1 && polC[sizeC-2] !=0)	
-		printf("%dx", polC[sizeC-2]);
-	else if (polC[sizeC-2] == -1)
-			printf("-x");
-	else if (polC[sizeC-2] == 1)
-			printf("x");
-
-	if (polC[sizeC-1] > 0)
-		printf("+%d\n", polC[sizeC-1]);
-	
-	if (polC[sizeC-1] < 0)	
-		printf("%d", polC[sizeC-1]);
-	printf("\n");
-	
-	
-/*	for (i=0;i<sizeC;i++){	
-	printf("k=%d ", polC[i]);
-	}*/
-	free(polA);
-	free(polB);	
-	free(polC);
-
+	if(actSize==2){
+		onePart();
+		free(arr);
+	return 0;	
+	}
+	if (!recursion (arr, 0, actSize,0)) {
+		printf ("Cena: %d\n", XMIN+amount);
+	}
+	free(arr);	
 return 0;
 }
+
+
+
